@@ -1,0 +1,3 @@
+[workspace]
+members = ["nbody-core", "nbody-app"]
+resolver = "2"
