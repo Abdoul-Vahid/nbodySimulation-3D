@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -8,50 +8,62 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub const ZERO: Vec3 = Vec3 { x: 0.0, y: 0.0, z: 0.0 };
+    pub const ZERO: Vec3 = Vec3 {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
 
+    #[inline]
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
     }
 
+    #[inline]
     pub fn dot(self, other: Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
+    #[inline]
     pub fn norm_sq(self) -> f64 {
         self.dot(self)
     }
 
+    #[inline]
     pub fn norm(self) -> f64 {
         self.norm_sq().sqrt()
+    }
+
+    #[inline]
+    pub fn cross(self, other: Self) -> Self {
+        Vec3 {
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
+        }
     }
 }
 
 impl Add for Vec3 {
     type Output = Self;
 
+    #[inline]
     fn add(self, other: Self) -> Self::Output {
-        Self::new(
-            self.x + other.x,
-            self.y + other.y,
-            self.z + other.z,
-        )
+        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
     }
 }
 
 impl Sub for Vec3 {
     type Output = Self;
 
+    #[inline]
     fn sub(self, other: Self) -> Self::Output {
-        Self::new(
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z,
-        )
+        Self::new(self.x - other.x, self.y - other.y, self.z - other.z)
     }
 }
 
 impl AddAssign for Vec3 {
+    #[inline]
     fn add_assign(&mut self, other: Self) {
         self.x += other.x;
         self.y += other.y;
@@ -60,6 +72,7 @@ impl AddAssign for Vec3 {
 }
 
 impl SubAssign for Vec3 {
+    #[inline]
     fn sub_assign(&mut self, other: Self) {
         self.x -= other.x;
         self.y -= other.y;
@@ -70,14 +83,25 @@ impl SubAssign for Vec3 {
 impl Mul<f64> for Vec3 {
     type Output = Self;
 
+    #[inline]
     fn mul(self, scalar: f64) -> Self::Output {
         Self::new(self.x * scalar, self.y * scalar, self.z * scalar)
+    }
+}
+
+impl Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    #[inline]
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        rhs * self
     }
 }
 
 impl Div<f64> for Vec3 {
     type Output = Self;
 
+    #[inline]
     fn div(self, scalar: f64) -> Self::Output {
         Self::new(self.x / scalar, self.y / scalar, self.z / scalar)
     }
@@ -86,11 +110,11 @@ impl Div<f64> for Vec3 {
 impl Neg for Vec3 {
     type Output = Self;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         Self::new(-self.x, -self.y, -self.z)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -130,5 +154,13 @@ mod tests {
         a += Vec3::new(1.0, 1.0, 1.0);
         a -= Vec3::new(0.0, 1.0, 0.0);
         assert_eq!(a, Vec3::new(1.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn cross_product() {
+        let x = Vec3::new(1.0, 0.0, 0.0);
+        let y = Vec3::new(0.0, 1.0, 0.0);
+        assert_eq!(x.cross(y), Vec3::new(0.0, 0.0, 1.0));
+        assert_eq!(y.cross(x), Vec3::new(0.0, 0.0, -1.0));
     }
 }
